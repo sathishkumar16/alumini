@@ -1,30 +1,49 @@
-const express = require('express')
-const middleware = require('@line/bot-sdk').middleware
-const JSONParseError = require('@line/bot-sdk').JSONParseError
-const SignatureValidationFailed = require('@line/bot-sdk').SignatureValidationFailed
+'use strict';
 
-const app = express()
+const line = require('@line/bot-sdk');
+const express = require('express');
 
+// create LINE SDK config from env variables
 const config = {
-  channelAccessToken: '6X8Zw/lAUqyxqsniFZhDmJhdbpFOYt+ERQCJq9jOH7o6NtSshWwIQklgZeiZ1Yi6f00hGF4JqX8AxE8D7sYkNfoafiizE+MDFlATFW0kCCSN3+3KWYIwsWGCZXq9ZaZ/I+VduhP3l8snBQa/Ib7LGQdB04t89/1O/w1cDnyilFU=',
-  channelSecret: '2e1a43f6818c7c1191c23ca7797ae61f'
+  channelAccessToken: '2e1a43f6818c7c1191c23ca7797ae61f',
+  channelSecret: '6X8Zw/lAUqyxqsniFZhDmJhdbpFOYt+ERQCJq9jOH7o6NtSshWwIQklgZeiZ1Yi6f00hGF4JqX8AxE8D7sYkNfoafiizE+MDFlATFW0kCCSN3+3KWYIwsWGCZXq9ZaZ/I+VduhP3l8snBQa/Ib7LGQdB04t89/1O/w1cDnyilFU=',
+};
+
+// create LINE SDK client
+const client = new line.Client(config);
+
+// create Express app
+// about Express itself: https://expressjs.com/
+const app = express();
+
+// register a webhook handler with middleware
+// about the middleware, please refer to doc
+app.post('/callback', line.middleware(config), (req, res) => {
+  Promise
+    .all(req.body.events.map(handleEvent))
+    .then((result) => res.json(result))
+    .catch((err) => {
+      console.error(err);
+      res.status(500).end();
+    });
+});
+
+// event handler
+function handleEvent(event) {
+  if (event.type !== 'message' || event.message.type !== 'text') {
+    // ignore non-text-message event
+    return Promise.resolve(null);
+  }
+
+  // create a echoing text message
+  const echo = { type: 'text', text: event.message.text };
+
+  // use reply API
+  return client.replyMessage(event.replyToken, echo);
 }
 
-app.use(middleware(config))
-
-app.post('/webhook', (req, res) => {
-  res.json(req.body.events) // req.body will be webhook event object
-})
-
-app.use((err, req, res, next) => {
-  if (err instanceof SignatureValidationFailed) {
-    res.status(401).send(err.signature)
-    return
-  } else if (err instanceof JSONParseError) {
-    res.status(400).send(err.raw)
-    return
-  }
-  next(err) // will throw default 500
-})
-
-app.listen(8080)
+// listen on port
+const port = 8080;
+app.listen(port, () => {
+  console.log(`listening on ${port}`);
+});
