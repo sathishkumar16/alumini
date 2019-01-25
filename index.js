@@ -16,10 +16,12 @@ const client = new line.Client(config);
 // about Express itself: https://expressjs.com/
 const app = express();
 
+groupId = ''; 
 
-app.get('/', function (req, res) {
-  res.send('Line API is Running')
-})
+
+app.get('/grouId', function (req, res) {
+  res.send(JSON.stringify({ 'groupId': groupId }));
+});
 
 // register a webhook handler with middleware
 // about the middleware, please refer to doc
@@ -43,8 +45,10 @@ function handleEvent(event) {
   // create a echoing text message
   const echo = { type: 'text', text: event.message.text };
   console.log('Group ID',event.source.groupId);
+
+  groupId = event.source.groupId;
   // use reply API
-  return client.replyMessage(event.replyToken, echo);
+  //return client.replyMessage(event.replyToken, echo);
 }
 
 // listen on port
