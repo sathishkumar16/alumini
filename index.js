@@ -16,6 +16,11 @@ const client = new line.Client(config);
 // about Express itself: https://expressjs.com/
 const app = express();
 
+
+app.get('/', function (req, res) {
+  res.send('Line API is Running')
+})
+
 // register a webhook handler with middleware
 // about the middleware, please refer to doc
 app.post('/callback', line.middleware(config), (req, res) => {
@@ -43,7 +48,7 @@ function handleEvent(event) {
 }
 
 // listen on port
-const port = 8080;
+const port = 80;
 app.listen(port, () => {
   console.log(`listening on ${port}`);
 });
