@@ -19,7 +19,7 @@ const app = express();
 var groupId = ''; 
 
 
-app.get('/grouId', function (req, res) {
+app.get('/groupId', function (req, res) {
   res.send(JSON.stringify({ 'groupId': groupId }));
 });
 
@@ -44,6 +44,7 @@ function handleEvent(event) {
 
   // create a echoing text message
   const echo = { type: 'text', text: event.message.text };
+  
   console.log('Group ID',event.source.groupId);
 
   groupId = event.source.groupId;
