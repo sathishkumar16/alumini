@@ -16,7 +16,7 @@ const client = new line.Client(config);
 // about Express itself: https://expressjs.com/
 const app = express();
 
-groupId = ''; 
+var groupId = ''; 
 
 
 app.get('/grouId', function (req, res) {
