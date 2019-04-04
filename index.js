@@ -5,8 +5,8 @@ const express = require('express');
 
 // create LINE SDK config from env variables
 const config = {
-  channelAccessToken: '6X8Zw/lAUqyxqsniFZhDmJhdbpFOYt+ERQCJq9jOH7o6NtSshWwIQklgZeiZ1Yi6f00hGF4JqX8AxE8D7sYkNfoafiizE+MDFlATFW0kCCSN3+3KWYIwsWGCZXq9ZaZ/I+VduhP3l8snBQa/Ib7LGQdB04t89/1O/w1cDnyilFU=',
-  channelSecret: '2e1a43f6818c7c1191c23ca7797ae61f',
+  channelAccessToken: 'CCHANNEL_ACCESS_TOKEN',
+  channelSecret: 'CHANNEL_SECRET',
 };
 
 // create LINE SDK client
@@ -17,10 +17,24 @@ const client = new line.Client(config);
 const app = express();
 
 var groupId = ''; 
+var messageSent = ''; 
 
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
+    res.header("Access-Control-Allow-Credentials", true);
+    res.header("X-FRAME-OPTIONS", "ALLOW_FROM :https://youtube.com");
+    // res.header("X-FRAME-OPTIONS", "*");
+    res.header('Cache-Control', 'private, no-cache, no-store, must-revalidate');
+    res.header('Expires', '-1');
+    res.header('Pragma', 'no-cache');
+    next();
+});
 
 app.get('/groupId', function (req, res) {
-  res.send(JSON.stringify({ 'groupId': groupId }));
+  res.send(JSON.stringify({ 'groupId': groupId, 'messageSent': messageSent }));
 });
 
 // register a webhook handler with middleware
@@ -45,9 +59,10 @@ function handleEvent(event) {
   // create a echoing text message
   const echo = { type: 'text', text: event.message.text };
   
-  console.log('Group ID',event.source.groupId);
+  console.log('Event',event);
 
   groupId = event.source.groupId;
+  messageSent = event.message.text;
   // use reply API
   //return client.replyMessage(event.replyToken, echo);
 }
